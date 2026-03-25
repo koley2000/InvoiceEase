@@ -79,7 +79,7 @@ export default async function handler(
           totalAmount: new Prisma.Decimal(invoice.totalAmount),
         },
       });
-      res.status(201).json({ message: "Invoice saved successfully" }); // Created
+      res.status(201).json({ message: "Invoice saved successfully", id: invoice.id }); // Created
     } catch (error: unknown) {
       let errorMessage = "Unknown error";
       if (error instanceof Error) {

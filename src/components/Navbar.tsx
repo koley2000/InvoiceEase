@@ -26,18 +26,6 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
 
-        {/* Center (Desktop Only) */}
-        {loginStatus && (
-          <div className="hidden md:flex items-center space-x-4 text-[#4A5568] tracking-widest text-base">
-            <Link href="/create-invoice" className="hover:text-accent transition hover:underline hover:scale-105">
-              Create New
-            </Link>
-            <Link href="/dashboard" className="hover:text-accent transition hover:underline hover:scale-105">
-              Dashboard
-            </Link>
-          </div>
-        )}
-
         {/* Right Side Buttons (Desktop) */}
         {!loginStatus && (
           <div className="hidden md:flex items-center gap-3">
@@ -56,6 +44,15 @@ const Navbar: React.FC = () => {
           </div>
         )}
 
+         {/* Center (Desktop Only) */}
+        {loginStatus && (
+          <div className="hidden md:flex items-center space-x-4 text-[#4A5568] tracking-widest text-base">
+            <Link href="/dashboard" className="text-accent transition hover:underline hover:scale-105">
+              Dashboard
+            </Link>
+          </div>
+        )}
+
         {loginStatus && (
           <div className="hidden md:flex items-center gap-3">
             <span className="text-sm font-medium text-black">
@@ -63,7 +60,7 @@ const Navbar: React.FC = () => {
             </span>
             <button
               onClick={() => signOut({ callbackUrl: '/' })}
-              className="rounded-md bg-gray-100 px-3 py-1.5 text-sm text-[#4A5568] font-semibold hover:bg-background hover:scale-105 hover:cursor-pointer"
+              className="rounded-md px-3 py-1.5 text-sm text-accent font-semibold hover:bg-accent hover:text-background hover:scale-105 hover:cursor-pointer"
             >
               Logout
             </button>
@@ -87,9 +84,6 @@ const Navbar: React.FC = () => {
               <>
                 <Link href="/dashboard" className="active:text-accent w-full text-sm">
                   Dashboard
-                </Link>
-                <Link href="#" className="active:text-accent w-full text-sm">
-                  Create New
                 </Link>
                 <button onClick={() => signOut({ callbackUrl: '/' })} className="active:text-accent w/full text-left text-sm">
                   Logout

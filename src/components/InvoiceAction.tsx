@@ -3,6 +3,8 @@ import generatePdfBlob from "@/utils/generatePdfBlob";
 import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import DeleteModal from "./DeleteModal";
+import { useRouter } from "next/router";
 
 interface InvoiceActionProps {
   invoiceData: Invoice;
@@ -16,6 +18,7 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const router = useRouter()
 
   const isFormValid = () => {
     return (
@@ -41,8 +44,11 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
       try {
         setIsSaving(true);
         toast.loading("Saving invoice...");
-        await axios.post("/api/invoice", invoiceData);
+        const response = await axios.post("/api/invoice", invoiceData);
+        invoiceData.id = response.data.id; // Update the local state with the new ID from the server  
         toast.dismiss();
+        toast.success("Invoice saved successfully!");
+        router.push('/dashboard'); // Redirect to the homepage after saving
       } catch (error: unknown) {
         toast.dismiss();
         toast.error(
@@ -50,7 +56,6 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
             `: ${(error as Error).message || "Unknown error"}`);
       } finally {
         setIsSaving(false);
-        toast.success("Invoice saved successfully!");
       }
     }
   };
@@ -110,10 +115,6 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
       }
     }
   };
-
-  const sendEmail = async () => {
-    toast.error("Email sending feature is not implemented yet.");
-  }
 
   const printPdf = async () => {
   // 1. Set loading state
@@ -194,13 +195,9 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
       >
         Download PDF
       </button>
-      <button
-        type="button"
-        onClick={sendEmail}
-        className="bg-gray-100 border-2 border-gray-800 text-gray-800 font-bold px-12 py-3 rounded text-sm hover:bg-gray-200 transition hover:scale-105 hover:cursor-pointer"
-      >
-        Send Via Email
-      </button>
+      {
+        invoiceData.id &&  <DeleteModal id={invoiceData.id}/>
+      }
       <button
         type="button"
         onClick={printPdf}

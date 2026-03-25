@@ -2,6 +2,7 @@ import React, { ChangeEvent, useEffect, useState, useCallback } from "react";
 import InvoiceAction from "@/components/InvoiceAction";
 import { Invoice } from "@/model/Invoice";
 import { RxCross1 } from "react-icons/rx";
+import { IoIosArrowDown } from "react-icons/io";
 
 interface InvoiceFormProps {
   invoice?: Invoice;
@@ -143,19 +144,22 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, isEditMode }) => {
                 >
                   Type
                 </label>
-                <select
-                  id="docType"
-                  className="w-full lg:w-1/2 border border-gray-300 rounded px-2 py-2 text-sm text-gray-700 focus:outline-none focus:ring focus:ring-secondary-accent focus:border-secondary-accent hover:cursor-pointer"
-                  name="docType"
-                  value={invoiceData.docType}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Type</option>
-                  <option value="Invoice">Invoice</option>
-                  <option value="Estimate">Estimate</option>
-                  <option value="Receipt">Receipt</option>
-                </select>
+                <div className="relative w-full lg:w-1/2">
+                  <select
+                    id="docType"
+                    className="w-full border border-gray-300 rounded px-2 py-2 pr-8 text-sm text-gray-700 appearance-none focus:outline-none focus:ring focus:ring-secondary-accent focus:border-secondary-accent hover:cursor-pointer"
+                    name="docType"
+                    value={invoiceData.docType}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Invoice">Invoice</option>
+                    <option value="Estimate">Estimate</option>
+                    <option value="Receipt">Receipt</option>
+                  </select>
+                  <IoIosArrowDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-700 pointer-events-none" />
+                </div>
               </div>
 
               <div>
@@ -264,18 +268,22 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, isEditMode }) => {
                 >
                   Payment Status
                 </label>
-                <select
-                  id="payStatus"
-                  className="w-full text-gray-700 border border-gray-300 rounded px-2 py-2 text-sm appearance-none box-border bg-white focus:outline-none focus:ring focus:ring-secondary-accent focus:border-secondary-accent hover:cursor-pointer"
-                  name="payStatus"
-                  value={invoiceData.payStatus}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="PAID">Paid</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="OVERDUE">Overdue</option>
-                </select>
+                <div className="relative">
+                  <select
+                    id="payStatus"
+                    className="w-full text-gray-700 border border-gray-300 rounded px-2 py-2 pr-8 text-sm appearance-none box-border bg-white focus:outline-none focus:ring focus:ring-secondary-accent focus:border-secondary-accent hover:cursor-pointer"
+                    name="payStatus"
+                    value={invoiceData.payStatus}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Status</option>
+                    <option value="PAID">Paid</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="OVERDUE">Overdue</option>
+                  </select>
+                  <IoIosArrowDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-700 pointer-events-none" />
+                </div>
               </div>
             </div>
           </div>
@@ -392,20 +400,23 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, isEditMode }) => {
               >
                 Payment Via
               </label>
-              <select
-                id="payType"
-                name="payType"
-                className="w-64 text-gray-700 border border-gray-300 rounded px-2 py-2 text-sm focus:outline-none focus:ring focus:ring-secondary-accent focus:border-secondary-accent hover:cursor-pointer"
-                value={invoiceData.payType}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Payment Via</option>
-                <option value="Payment Due">Payment Due</option>
-                <option value="Cash">Cash</option>
-                <option value="UPI">UPI</option>
-                <option value="Debit / Credit Card">Debit / Credit Card</option>
-              </select>
+              <div className="relative">
+                <select
+                  id="payType"
+                  name="payType"
+                  className="w-64 text-gray-700 border border-gray-300 rounded px-2 py-2 pr-8 text-sm appearance-none focus:outline-none focus:ring focus:ring-secondary-accent focus:border-secondary-accent hover:cursor-pointer"
+                  value={invoiceData.payType}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Payment Via</option>
+                  <option value="Payment Due">Payment Due</option>
+                  <option value="Cash">Cash</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Debit / Credit Card">Debit / Credit Card</option>
+                </select>
+                <IoIosArrowDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-700 pointer-events-none" />
+              </div>
             </div>
 
             {/* Totals (right column) */}

@@ -9,20 +9,40 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FaRegTrashAlt } from "react-icons/fa";
-
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useRouter } from "next/router";
 
 interface DeleteModalProps {
- deleteInvoice: (id: number) => void;
- id: number;
+  id: number;
 }
 
-const DeleteModal: React.FC<DeleteModalProps> = ({ deleteInvoice, id }) => {
-    
+const DeleteModal: React.FC<DeleteModalProps> = ({ id }) => {
+
+  const router = useRouter();
+
+  const deleteInvoice = async (id: number) => {
+  try {
+    await axios.delete(`/api/invoice/${id}`);
+    toast.success("Invoice deleted successfully");
+    router.push("/dashboard"); // Redirect to the homepage after deletion
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to delete invoice");
+  }
+};
+
   return (
     <>
       <Dialog>
-        <DialogTrigger asChild><FaRegTrashAlt className="h-5 w-5 text-red-500 hover:text-red-700 hover:cursor-pointer" /></DialogTrigger>
+        <DialogTrigger asChild>
+          <button
+            type="button"
+            className="bg-red-700 text-white px-12 py-3 rounded text-sm hover:bg-red-800 transition hover:scale-105 cursor-pointer"
+          >
+            Delete
+          </button>
+        </DialogTrigger>
 
         <DialogContent className="sm:max-w-[625px]">
           <DialogHeader>

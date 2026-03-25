@@ -4,11 +4,19 @@ import type { AppProps } from "next/app";
 import Head from "next/head";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
+import { Syne } from "next/font/google";
+
+const syne = Syne({
+  subsets: ["latin"],
+  variable: "--font-syne",
+  display: "swap",
+});
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <SessionProvider session={pageProps.session}>
-      <>
+    <div className={syne.variable}>
+      <SessionProvider session={pageProps.session}>
+        <main>
         <Head>
           <title>InvoiceEase</title>
           <link
@@ -34,7 +42,8 @@ export default function App({ Component, pageProps }: AppProps) {
         <Toaster position="top-center" reverseOrder={false} />
 
         <Component {...pageProps} />
-      </>
-    </SessionProvider>
+      </main>
+      </SessionProvider>
+    </div>
   );
 }
