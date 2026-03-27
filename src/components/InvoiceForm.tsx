@@ -400,7 +400,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, isEditMode }) => {
               >
                 Payment Via
               </label>
-              <div className="relative">
+              <div className="relative w-64">
                 <select
                   id="payType"
                   name="payType"

@@ -51,7 +51,7 @@ export default async function handler(
     }
 
     try {
-      await prisma.invoice.create({
+      const newInvoice = await prisma.invoice.create({
         data: {
           userId: user.id,
           invoiceNumber: invoice.invoiceNumber,
@@ -79,7 +79,7 @@ export default async function handler(
           totalAmount: new Prisma.Decimal(invoice.totalAmount),
         },
       });
-      res.status(201).json({ message: "Invoice saved successfully", id: invoice.id }); // Created
+      res.status(201).json({ message: "Invoice saved successfully", id: newInvoice.id }); // Created
     } catch (error: unknown) {
       let errorMessage = "Unknown error";
       if (error instanceof Error) {

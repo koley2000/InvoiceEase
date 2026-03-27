@@ -18,13 +18,13 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
 
   const isFormValid = () => {
     return (
       invoiceData.items.length > 0 &&
       invoiceData.items.some(
-        (item) => item.des.trim() !== "" && item.price > 0 && item.qty > 0
+        (item) => item.des.trim() !== "" && item.price > 0 && item.qty > 0,
       ) &&
       invoiceData.docType.trim() !== "" &&
       invoiceData.customerDetails.trim() !== "" &&
@@ -36,27 +36,31 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
 
   const saveInvoice = async () => {
     if (!isFormValid()) {
-      toast.error(
-        "Please fill in all required fields before saving the invoice."
-      );
+      toast.error("Please fill in all required fields.");
       return;
-    } else {
-      try {
-        setIsSaving(true);
-        toast.loading("Saving invoice...");
-        const response = await axios.post("/api/invoice", invoiceData);
-        invoiceData.id = response.data.id; // Update the local state with the new ID from the server  
-        toast.dismiss();
-        toast.success("Invoice saved successfully!");
-        router.push('/dashboard'); // Redirect to the homepage after saving
-      } catch (error: unknown) {
-        toast.dismiss();
-        toast.error(
-          "Failed to save invoice" +
-            `: ${(error as Error).message || "Unknown error"}`);
-      } finally {
-        setIsSaving(false);
+    }
+
+    try {
+      setIsSaving(true);
+      const loadingToast = toast.loading("Saving invoice...");
+
+      const response = await axios.post("/api/invoice", invoiceData);
+      const newId = response.data.id;
+
+      if (!newId) {
+        throw new Error("No ID returned from server");
       }
+
+      toast.dismiss(loadingToast);
+      toast.success("Invoice saved successfully!");
+
+      // Force a small delay or use router.prefetch to ensure the environment is ready
+      router.push(`/edit-invoice/${newId}`);
+    } catch (error: unknown) {
+      toast.dismiss();
+      toast.error(`Failed to save: ${(error as Error).message}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -64,15 +68,13 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
     try {
       setIsSaving(true);
       toast.loading("Updating invoice...");
-      await axios.put(
-        `/api/invoice/${invoiceData.id}`,
-        invoiceData
-      );
+      await axios.put(`/api/invoice/${invoiceData.id}`, invoiceData);
       toast.dismiss();
     } catch (error: unknown) {
       toast.dismiss();
       toast.error(
-        `Failed to update invoice:${(error as Error).message || "Unknown error"}`);
+        `Failed to update invoice:${(error as Error).message || "Unknown error"}`,
+      );
     } finally {
       setIsSaving(false);
       toast.success("Invoice updated successfully!");
@@ -82,7 +84,7 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
   const downloadInvoice = async () => {
     if (!isFormValid()) {
       toast.error(
-        "Please fill in all required fields before downloading the invoice."
+        "Please fill in all required fields before downloading the invoice.",
       );
       return;
     } else {
@@ -117,22 +119,22 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
   };
 
   const printPdf = async () => {
-  // 1. Set loading state
-  setIsPrinting(true);
+    // 1. Set loading state
+    setIsPrinting(true);
 
-  // 2. Open the window IMMEDIATELY (Synchronously)
-  // This bypasses popup blockers because it happens directly inside the click event.
-  const previewWindow = window.open("", "_blank");
+    // 2. Open the window IMMEDIATELY (Synchronously)
+    // This bypasses popup blockers because it happens directly inside the click event.
+    const previewWindow = window.open("", "_blank");
 
-  // Check if blocker killed it
-  if (!previewWindow) {
-    setIsPrinting(false);
-    toast.error("Pop-up blocked. Please allow pop-ups to view the PDF.");
-    return;
-  }
+    // Check if blocker killed it
+    if (!previewWindow) {
+      setIsPrinting(false);
+      toast.error("Pop-up blocked. Please allow pop-ups to view the PDF.");
+      return;
+    }
 
-  // 3. Add a temporary loading message to the new tab
-  previewWindow.document.write(`
+    // 3. Add a temporary loading message to the new tab
+    previewWindow.document.write(`
     <html>
       <head><title>Generating Preview...</title></head>
       <body style="display:flex; justify-content:center; align-items:center; height:100vh; margin:0; font-family:sans-serif; background: #f5f5f5;">
@@ -141,41 +143,40 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
     </html>
   `);
 
-  try {
-    // Check validation
-    if (!isFormValid()) {
-      toast.error("Please fill in all required fields.");
-      previewWindow.close(); // Close the blank tab since validation failed
-      return; 
-      // Note: We don't need setIsPrinting(false) here because 'finally' below handles it
+    try {
+      // Check validation
+      if (!isFormValid()) {
+        toast.error("Please fill in all required fields.");
+        previewWindow.close(); // Close the blank tab since validation failed
+        return;
+        // Note: We don't need setIsPrinting(false) here because 'finally' below handles it
+      }
+
+      toast.loading("Generating PDF...");
+
+      // 4. Generate the Blob
+      const pdfBlob = await generatePdfBlob(invoiceData);
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      // 5. Redirect the new window to the PDF Blob
+      // This loads the browser's native PDF viewer (Chrome/Edge/Firefox viewer)
+      previewWindow.location.href = pdfUrl;
+
+      // Optional: Set a timeout to clean up the blob URL from memory after 1 minute
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+
+      toast.dismiss();
+      toast.success("PDF Preview opened.");
+    } catch (error) {
+      console.error("Preview error:", error);
+      toast.dismiss();
+      toast.error("Failed to generate PDF.");
+      previewWindow.close(); // Close the loading tab on error
+    } finally {
+      // 6. CRITICAL: This ensures the button becomes clickable again
+      setIsPrinting(false);
     }
-
-    toast.loading("Generating PDF...");
-
-    // 4. Generate the Blob
-    const pdfBlob = await generatePdfBlob(invoiceData);
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-
-    // 5. Redirect the new window to the PDF Blob
-    // This loads the browser's native PDF viewer (Chrome/Edge/Firefox viewer)
-    previewWindow.location.href = pdfUrl;
-    
-    // Optional: Set a timeout to clean up the blob URL from memory after 1 minute
-    setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
-
-    toast.dismiss();
-    toast.success("PDF Preview opened.");
-
-  } catch (error) {
-    console.error("Preview error:", error);
-    toast.dismiss();
-    toast.error("Failed to generate PDF.");
-    previewWindow.close(); // Close the loading tab on error
-  } finally {
-    // 6. CRITICAL: This ensures the button becomes clickable again
-    setIsPrinting(false);
-  }
-};
+  };
 
   return (
     <>
@@ -195,9 +196,7 @@ const InvoiceAction: React.FC<InvoiceActionProps> = ({
       >
         Download PDF
       </button>
-      {
-        invoiceData.id &&  <DeleteModal id={invoiceData.id}/>
-      }
+      {invoiceData.id && <DeleteModal id={invoiceData.id} />}
       <button
         type="button"
         onClick={printPdf}
