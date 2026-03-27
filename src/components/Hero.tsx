@@ -38,7 +38,7 @@ const Hero: React.FC = () => {
                 <span className="text-accent">✔</span>Save invoices securely online.
               </li>
               <li className="flex items-center gap-2">
-                <span className="text-accent">✔</span>Download or email invoices as PDFs.
+                <span className="text-accent">✔</span>Download invoices as PDFs or print them directly.
               </li>
             </ul>
 
